@@ -1,0 +1,66 @@
+FROM buildpack-deps:jessie-scm
+
+# Configure apt-get feeds
+RUN echo "deb http://apt.llvm.org/jessie/ llvm-toolchain-jessie-3.8 main" | tee /etc/apt/sources.list.d/llvm.list
+RUN wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | apt-key add -
+RUN apt-get update
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+# Install .NET Core dependencies
+        libc6 \
+        libcurl3 \
+        libgcc1 \
+        libgssapi-krb5-2 \
+        libicu52 \
+        liblttng-ust0 \
+        libssl1.0.0 \
+        libstdc++6 \
+        libunwind8 \
+        libuuid1 \
+        zlib1g \
+# Install .NET Core build toolchain dependencies
+        make \
+        cmake \
+        llvm-3.5 \
+        clang-3.5 \
+        lldb-3.8 \ 
+        lldb-3.8-dev \
+# Install CoreCLR build toolchain dependencies
+        libicu-dev \
+        libunwind8-dev \
+        liblttng-ust-dev \
+# Install CoreFX build toolchain dependencies
+        libc6-dev \
+        libssl-dev \
+        libkrb5-dev \
+        libcurl4-openssl-dev \
+        zlib1g-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /git
+RUN git clone https://github.com/dotnet/coreclr
+WORKDIR coreclr
+RUN ./build.sh Release
+
+WORKDIR /git
+RUN git clone https://github.com/dotnet/corefx
+WORKDIR corefx
+RUN ./build-native.sh -release
+RUN ./build-managed.sh -release -skiptests
+
+WORKDIR /app
+WORKDIR /
+
+RUN cp git/coreclr/bin/Product/Linux.x64.Release/*.* app
+RUN cp git/coreclr/bin/Product/Linux.x64.Release/corerun app
+RUN cp git/corefx/bin/Linux.x64.Release/Native/*.a app
+RUN cp git/corefx/bin/Linux.x64.Release/Native/*.so app
+RUN cp git/corefx/bin/Unix.AnyCPU.Release/System.Console/*.dll app
+RUN cp git/corefx/bin/AnyOS.AnyCPU.Release/System.Threading/*.dll app
+RUN cp git/corefx/bin/AnyOS.AnyCPU.Release/System.Text.Encoding.Extensions/*.dll app
+
+WORKDIR /app
+RUN rm *.so.dbg
+ADD hw-test.dll .
+ENTRYPOINT  ["./corerun","-c",".","hw-test.dll"]
