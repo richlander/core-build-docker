@@ -9,11 +9,6 @@ RUN apt-get update \
     git \
     && rm -rf /var/lib/apt/lists/*
 
-# Configure apt-get feeds
-RUN echo "deb http://apt.llvm.org/jessie/ llvm-toolchain-jessie-3.5 main" | tee /etc/apt/sources.list.d/llvm.list
-RUN wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | apt-key add -
-RUN apt-get update
-
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
 # Install .NET Core dependencies
