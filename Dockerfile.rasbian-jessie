@@ -53,8 +53,7 @@ RUN ./build.sh Release
 WORKDIR /git
 RUN git clone https://github.com/dotnet/corefx
 WORKDIR corefx
-RUN ./build-native.sh -release
-RUN ./build-managed.sh -release -skiptests
+RUN ./src/Native/build-native.sh -release
 
 WORKDIR /app
 WORKDIR /
@@ -64,9 +63,6 @@ RUN cp git/coreclr/bin/Product/Linux.x64.Release/*.* app
 RUN cp git/coreclr/bin/Product/Linux.x64.Release/corerun app
 RUN cp git/corefx/bin/Linux.x64.Release/Native/*.a app
 RUN cp git/corefx/bin/Linux.x64.Release/Native/*.so app
-RUN cp git/corefx/bin/Unix.AnyCPU.Release/System.Console/*.dll app
-RUN cp git/corefx/bin/AnyOS.AnyCPU.Release/System.Threading/*.dll app
-RUN cp git/corefx/bin/AnyOS.AnyCPU.Release/System.Text.Encoding.Extensions/*.dll app
 
 WORKDIR /app
 RUN rm *.so.dbg
