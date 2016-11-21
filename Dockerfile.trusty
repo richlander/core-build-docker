@@ -1,0 +1,64 @@
+FROM buildpack-deps:trusty-scm
+
+# Configure apt-get feeds
+RUN echo "deb http://llvm.org/apt/trusty/ llvm-toolchain-trusty-3.6 main" | sudo tee /etc/apt/sources.list.d/llvm.list
+RUN wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | apt-key add -
+RUN apt-get update
+
+# Install .NET Core dependencies
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+    # Install .NET Core dependencies
+        libunwind8 \
+        gettext \
+        libcurl4-openssl-dev \
+        libssl-dev \
+        uuid-dev \
+     # Install .NET Core build toolchain dependencies   
+        make \
+        cmake \
+        llvm-3.5 \
+        clang-3.5 \
+        lldb-3.6 \
+        lldb-3.6-dev \
+    # Install CoreCLR build toolchain dependencies
+        libicu-dev \
+        libunwind8-dev \
+        liblttng-ust-dev \
+    # Install CoreFX build toolchain dependencies
+        libc6-dev \
+        libssl-dev \
+        libkrb5-dev \
+        libcurl4-openssl-dev \
+        zlib1g-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /git
+RUN git clone https://github.com/richlander/core-build-docker
+
+WORKDIR /git
+RUN git clone https://github.com/dotnet/coreclr
+WORKDIR coreclr
+RUN ./build.sh Release
+
+WORKDIR /git
+RUN git clone https://github.com/dotnet/corefx
+WORKDIR corefx
+RUN ./build-native.sh -release
+RUN ./build-managed.sh -release -skiptests
+
+WORKDIR /app
+WORKDIR /
+
+RUN cp git/core-build-docker/*.dll app
+RUN cp git/coreclr/bin/Product/Linux.x64.Release/*.* app
+RUN cp git/coreclr/bin/Product/Linux.x64.Release/corerun app
+RUN cp git/corefx/bin/Linux.x64.Release/Native/*.a app
+RUN cp git/corefx/bin/Linux.x64.Release/Native/*.so app
+RUN cp git/corefx/bin/Unix.AnyCPU.Release/System.Console/*.dll app
+RUN cp git/corefx/bin/AnyOS.AnyCPU.Release/System.Threading/*.dll app
+RUN cp git/corefx/bin/AnyOS.AnyCPU.Release/System.Text.Encoding.Extensions/*.dll app
+
+WORKDIR /app
+RUN rm *.so.dbg
+ENTRYPOINT  ["./corerun","-c",".","hello-core.dll"]
