@@ -39,6 +39,9 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /git
+RUN git clone https://github.com/richlander/core-build-docker
+
+WORKDIR /git
 RUN git clone https://github.com/dotnet/coreclr
 WORKDIR coreclr
 RUN ./build.sh Release
@@ -52,6 +55,7 @@ RUN ./build-managed.sh -release -skiptests
 WORKDIR /app
 WORKDIR /
 
+RUN cp git/core-build-docker/*.dll app
 RUN cp git/coreclr/bin/Product/Linux.x64.Release/*.* app
 RUN cp git/coreclr/bin/Product/Linux.x64.Release/corerun app
 RUN cp git/corefx/bin/Linux.x64.Release/Native/*.a app
@@ -62,5 +66,4 @@ RUN cp git/corefx/bin/AnyOS.AnyCPU.Release/System.Text.Encoding.Extensions/*.dll
 
 WORKDIR /app
 RUN rm *.so.dbg
-ADD hw-test.dll .
 ENTRYPOINT  ["./corerun","-c",".","hw-test.dll"]
