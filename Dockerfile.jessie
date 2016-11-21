@@ -66,4 +66,4 @@ RUN cp git/corefx/bin/AnyOS.AnyCPU.Release/System.Text.Encoding.Extensions/*.dll
 
 WORKDIR /app
 RUN rm *.so.dbg
-ENTRYPOINT  ["./corerun","-c",".","hw-test.dll"]
+ENTRYPOINT  ["./corerun","-c",".","hello-core.dll"]
