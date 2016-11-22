@@ -66,4 +66,4 @@ RUN cp git/corefx/bin/Linux.x64.Release/Native/*.so app
 
 WORKDIR /app
 RUN rm *.so.dbg
-ENTRYPOINT  ["./corerun","-c",".","hw-test.dll"]
+ENTRYPOINT  ["./corerun","-c",".","hello-core.dll"]
