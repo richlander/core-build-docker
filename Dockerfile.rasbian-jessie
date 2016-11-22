@@ -59,10 +59,10 @@ WORKDIR /app
 WORKDIR /
 
 RUN cp git/core-build-docker/*.dll app
-RUN cp git/coreclr/bin/Product/Linux.x64.Release/*.* app
-RUN cp git/coreclr/bin/Product/Linux.x64.Release/corerun app
-RUN cp git/corefx/bin/Linux.x64.Release/Native/*.a app
-RUN cp git/corefx/bin/Linux.x64.Release/Native/*.so app
+RUN cp git/coreclr/bin/Product/Linux.arm.Release/*.* app
+RUN cp git/coreclr/bin/Product/Linux.arm.Release/corerun app
+RUN cp git/corefx/bin/Linux.arm.Release/Native/*.a app
+RUN cp git/corefx/bin/Linux.arm.Release/Native/*.so app
 
 WORKDIR /app
 RUN rm *.so.dbg
