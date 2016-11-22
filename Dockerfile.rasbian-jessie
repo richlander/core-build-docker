@@ -53,7 +53,7 @@ RUN ./build.sh Release
 WORKDIR /git
 RUN git clone https://github.com/dotnet/corefx
 WORKDIR corefx
-RUN ./src/Native/build-native.sh -release
+RUN ./src/Native/build-native.sh release
 
 WORKDIR /app
 WORKDIR /
@@ -61,8 +61,8 @@ WORKDIR /
 RUN cp git/core-build-docker/*.dll app
 RUN cp git/coreclr/bin/Product/Linux.arm.Release/*.* app
 RUN cp git/coreclr/bin/Product/Linux.arm.Release/corerun app
-RUN cp git/corefx/bin/Linux.arm.Release/Native/*.a app
-RUN cp git/corefx/bin/Linux.arm.Release/Native/*.so app
+RUN cp git/corefx/bin/Linux.x64.Release/Native/*.a app
+RUN cp git/corefx/bin/Linux.x64.Release/Native/*.so app
 
 WORKDIR /app
 RUN rm *.so.dbg
